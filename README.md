@@ -6,6 +6,25 @@ A simple, no frills, dependency-free CPE 2.3 parser written in Python 3.
 
 - Convert [CPE 2.3](https://cpe.mitre.org/specification/) IDs into Well-Formed Names (WFNs) represented using [dataclasses](https://github.com/python/cpython/blob/main/Lib/dataclasses.py).
 
+> ℹ️ A GZIP compressed JSONL file containing information about every CPE 2.3 ID in the NVD is available in `data/cpes.jsonl.gz` and has the following format:
+
+```json
+{
+  "id": "cpe:2.3:a:microsoft:sql_server:-:*:*:*:*:*:*:*",
+  "part": "a",
+  "vendor": "microsoft",
+  "product": "sql_server",
+  "version": "-",
+  "update": "*",
+  "edition": "*",
+  "language": "*",
+  "sw_edition": "*",
+  "target_sw": "*",
+  "target_hw": "*",
+  "other": "*"
+}
+```
+
 ## Usage
 
 ### Command line
