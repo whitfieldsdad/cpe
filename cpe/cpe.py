@@ -104,7 +104,6 @@ def _cli():
 
     for cpe in args.cpes:
         wfn = parse(cpe)
-        print(wfn)
         blob = json.dumps(dataclasses.asdict(wfn))
         print(blob)
 
