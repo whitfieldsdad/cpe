@@ -103,14 +103,30 @@ def _cli():
     parser.add_argument('cpes', nargs='*', help='CPEs to parse')
     args = parser.parse_args()
     if not args.cpes:
+        if _stdin_is_empty():
+            parser.print_help()
+            sys.exit(1)
+        
         cpes = sys.stdin.read().splitlines()
     else:
         cpes = args.cpes
 
     for cpe in cpes:
-        wfn = parse(cpe)
+        try:
+            wfn = parse(cpe)
+        except TypeError as e:
+            print(e, file=sys.stderr)
+            sys.exit(1)
+        
         blob = json.dumps(dataclasses.asdict(wfn))
         print(blob)
+
+
+def _stdin_is_empty() -> bool:
+    try:
+        return sys.stdin.isatty()
+    except AttributeError:
+        return False
 
 
 if __name__ == '__main__':
