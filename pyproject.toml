@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "cpe"
+version = "0.2.0"
+description = "Decompose CPE 2.3 IDs into Well-Formed Names (WFNs)"
+authors = ["Tyler Fisher <tylerfisher@tylerfisher.ca>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.scripts]
+cpe = "cpe.cpe:_cli"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
