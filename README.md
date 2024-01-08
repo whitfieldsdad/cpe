@@ -120,6 +120,12 @@ To write the results to a GZIP compressed JSONL file:
 gzcat data/cpes.txt.gz | python3 cpe/cpe.py | jq -c '.' | gzip > data/cpes.jsonl.gz
 ```
 
+You can download all CPE IDs in JSONL format using the following command:
+
+```bash
+wget https://github.com/whitfieldsdad/cpe/raw/main/data/cpes.jsonl.gz -O - | gzcat | jq '.' -c
+```
+
 ### Python
 
 ### Parsing CPE IDs in Python
