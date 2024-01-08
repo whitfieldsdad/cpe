@@ -4,9 +4,38 @@ A simple, no frills, dependency-free CPE 2.3 parser written in Python 3.
 
 ## Features
 
-- Convert [CPE 2.3](https://cpe.mitre.org/specification/) IDs into Well-Formed Names (WFNs) represented using [dataclasses](https://github.com/python/cpython/blob/main/Lib/dataclasses.py).
+- Decompose [CPE 2.3 IDs](https://cpe.mitre.org/specification/) into Well-Formed Names (WFNs) using [dataclasses](https://github.com/python/cpython/blob/main/Lib/dataclasses.py)
+- A command line interface which produces JSONL output and accepts one or more CPE IDs positionally or via stdin
 
-> ℹ️ A GZIP compressed JSONL file containing information about every CPE 2.3 ID in the NVD is available in `data/cpes.jsonl.gz` and has the following format:
+## Usage
+
+The [script](cpe/cpe.py) is designed to be used as either a standalone tool or as a module.
+
+- [Command line](#command-line)
+  - [Parsing CPE IDs via the command line](#parsing-cpe-ids-via-the-command-line)
+  - [Parsing every CPE ID in the NVD](#parsing-every-cpe-id-in-the-nvd)
+- [Python](#python)
+  - [Parsing CPE IDs in Python](#parsing-cpe-ids-in-python)
+
+### Command line
+
+#### Parsing CPE IDs via the command line
+
+To parse one or more CPE IDs, pass in one or more CPE IDs separated by a space.
+
+To use a local copy of the script:
+
+```bash
+python3 cpe/cpe.py 'cpe:2.3:a:microsoft:sql_server:-:*:*:*:*:*:*:*' | jq
+```
+
+To use a remote copy of the script:
+
+```bash
+curl https://gist.githubusercontent.com/whitfieldsdad/0b0db7da70b13a892c58e9b5acf0a7ec/raw/885d648f29d1d8240df2f374c3ea7a7fa553c65a/cpe.py -s | python3 - 'cpe:2.3:a:microsoft:sql_server:-:*:*:*:*:*:*:*' | jq
+```
+
+Example output:
 
 ```json
 {
@@ -24,38 +53,16 @@ A simple, no frills, dependency-free CPE 2.3 parser written in Python 3.
   "other": "*"
 }
 ```
-
-## Usage
-
-### Command line
-
-To use a local copy of the script:
-
-```bash
-python3 cpe.py 
-```
-
-To use a remote copy of the script:
-
-```bash
-curl https://gist.githubusercontent.com/whitfieldsdad/0b0db7da70b13a892c58e9b5acf0a7ec/raw/885d648f29d1d8240df2f374c3ea7a7fa553c65a/cpe.py | python3 - 'cpe:2.3:a:microsoft:sql_server:-:*:*:*:*:*:*:*'
-```
-
-Example output:
-
-```json
-{"id": "cpe:2.3:a:microsoft:sql_server:-:*:*:*:*:*:*:*", "part": "a", "vendor": "microsoft", "product": "sql_server", "version": "-", "update": "*", "edition": "*", "language": "*", "sw_edition": "*", "target_sw": "*", "target_hw": "*", "other": "*"}
-```
-
-> ℹ️ CPE IDs can be passed positionally or via stdin
  
 > ℹ️ CPE IDs should be quoted to prevent shell expansion - if you don't quote the CPE IDs, your shell will treat them as [globs](https://en.wikipedia.org/wiki/Glob_(programming)) by default.
+>
+> ℹ️ CPE IDs can be passed positionally or via stdin
 
-#### Parsing every CPE 2.3 ID in the NVD
+#### Parsing every CPE ID in the NVD
 
-`data/cpe.txt.gz` is a GZIP compressed text file containing every CPE 2.3 ID in the [NVD](https://nvd.nist.gov/). 
+All CPE IDs in the NVD are provided in a GZIP compressed text file: `data/cpes.txt.gz`
 
-To parse every CPE ID in the NVD, use `gzcat` to decompress the file, pipe it to `python3`, and pipe the output to `jq`:
+To decompose every CPE ID into a Well Formed Name (WFN) in JSON format:
 
 ```bash
 gzcat data/cpes.txt.gz | python3 cpe/cpe.py | jq
@@ -94,7 +101,7 @@ gzcat data/cpes.txt.gz | python3 cpe/cpe.py | jq
 ...
 ```
 
-If you'd prefer JSONL output:
+If you'd prefer JSONL format:
 
 ```bash
 gzcat data/cpes.txt.gz | python3 cpe/cpe.py | jq -c
@@ -107,8 +114,40 @@ gzcat data/cpes.txt.gz | python3 cpe/cpe.py | jq -c
 ...
 ```
 
-To write the results to a GZIP compressed output file:
+To write the results to a GZIP compressed JSONL file:
 
 ```bash
 gzcat data/cpes.txt.gz | python3 cpe/cpe.py | jq -c '.' | gzip > data/cpes.jsonl.gz
+```
+
+### Python
+
+### Parsing CPE IDs in Python
+
+To parse `cpe:2.3:a:microsoft:sql_server:-:*:*:*:*:*:*:*`:
+
+```python
+import cpe
+import dataclasses
+import json
+
+result = cpe.parse('cpe:2.3:a:microsoft:sql_server:-:*:*:*:*:*:*:*')
+print(json.dumps(dataclasses.asdict(result), indent=4))
+```
+
+```json
+{
+    "id": "cpe:2.3:a:microsoft:sql_server:-:*:*:*:*:*:*:*",
+    "part": "a",
+    "vendor": "microsoft",
+    "product": "sql_server",
+    "version": "-",
+    "update": "*",
+    "edition": "*",
+    "language": "*",
+    "sw_edition": "*",
+    "target_sw": "*",
+    "target_hw": "*",
+    "other": "*"
+}
 ```
