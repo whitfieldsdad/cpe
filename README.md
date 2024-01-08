@@ -106,3 +106,9 @@ gzcat data/cpes.txt.gz | python3 cpe/cpe.py | jq -c
 {"id":"cpe:2.3:o:microsoft:windows_server_2022_23h2:10.0.25398.531:*:*:*:*:*:x64:*","part":"o","vendor":"microsoft","product":"windows_server_2022_23h2","version":"10.0.25398.531","update":"*","edition":"*","language":"*","sw_edition":"*","target_sw":"*","target_hw":"x64","other":"*"}
 ...
 ```
+
+To write the results to a GZIP compressed output file:
+
+```bash
+gzcat data/cpes.txt.gz | python3 cpe/cpe.py | jq -c '.' | gzip > data/cpes.jsonl.gz
+```
