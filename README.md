@@ -29,48 +29,29 @@ A simple, no frills, dependency-free CPE 2.3 parser written in Python 3.
 
 ### Command line
 
-### Parsing CPE 2.3 IDs on the command line
-
-To parse one or more CPE IDs on the command line, provide a space delimited list of CPE IDs:
+To use a local copy of the script:
 
 ```bash
-poetry run cpe 'cpe:2.3:o:microsoft:windows_10_1607:10.0.14393.5427:*:*:*:*:*:arm64:*' 'cpe:2.3:a:microsoft:internet_explorer:4.0.1:sp1:*:*:*:*:*:*' | jq
+python3 cpe.py 
 ```
+
+To use a remote copy of the script:
+
+```bash
+curl https://gist.githubusercontent.com/whitfieldsdad/0b0db7da70b13a892c58e9b5acf0a7ec/raw/885d648f29d1d8240df2f374c3ea7a7fa553c65a/cpe.py | python3 - 'cpe:2.3:a:microsoft:sql_server:-:*:*:*:*:*:*:*'
+```
+
+Example output:
 
 ```json
-{
-  "id": "cpe:2.3:o:microsoft:windows_10_1607:10.0.14393.5427:*:*:*:*:*:arm64:*",
-  "part": "o",
-  "vendor": "microsoft",
-  "product": "windows_10_1607",
-  "version": "10.0.14393.5427",
-  "update": "*",
-  "edition": "*",
-  "language": "*",
-  "sw_edition": "*",
-  "target_sw": "*",
-  "target_hw": "arm64",
-  "other": "*"
-}
-{
-  "id": "cpe:2.3:a:microsoft:internet_explorer:4.0.1:sp1:*:*:*:*:*:*",
-  "part": "a",
-  "vendor": "microsoft",
-  "product": "internet_explorer",
-  "version": "4.0.1",
-  "update": "sp1",
-  "edition": "*",
-  "language": "*",
-  "sw_edition": "*",
-  "target_sw": "*",
-  "target_hw": "*",
-  "other": "*"
-}
+{"id": "cpe:2.3:a:microsoft:sql_server:-:*:*:*:*:*:*:*", "part": "a", "vendor": "microsoft", "product": "sql_server", "version": "-", "update": "*", "edition": "*", "language": "*", "sw_edition": "*", "target_sw": "*", "target_hw": "*", "other": "*"}
 ```
 
+> ℹ️ CPE IDs can be passed positionally or via stdin
+ 
 > ℹ️ CPE IDs should be quoted to prevent shell expansion - if you don't quote the CPE IDs, your shell will treat them as [globs](https://en.wikipedia.org/wiki/Glob_(programming)) by default.
 
-### Parsing every CPE 2.3 ID in the NVD
+#### Parsing every CPE 2.3 ID in the NVD
 
 `data/cpe.txt.gz` is a GZIP compressed text file containing every CPE 2.3 ID in the [NVD](https://nvd.nist.gov/). 
 
