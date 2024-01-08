@@ -3,6 +3,7 @@ import dataclasses
 import argparse
 import json
 import re
+import sys
 
 _RE_SPLIT = re.compile(r'(?<!\\):')
 
@@ -99,10 +100,14 @@ def parse(cpe: str) -> CPE:
 
 def _cli():
     parser = argparse.ArgumentParser(description='CPE 2.3 parser')
-    parser.add_argument('cpes', nargs='+', help='CPEs to parse')
+    parser.add_argument('cpes', nargs='*', help='CPEs to parse')
     args = parser.parse_args()
+    if not args.cpes:
+        cpes = sys.stdin.read().splitlines()
+    else:
+        cpes = args.cpes
 
-    for cpe in args.cpes:
+    for cpe in cpes:
         wfn = parse(cpe)
         blob = json.dumps(dataclasses.asdict(wfn))
         print(blob)
