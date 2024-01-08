@@ -32,7 +32,7 @@ python3 cpe/cpe.py 'cpe:2.3:a:microsoft:sql_server:-:*:*:*:*:*:*:*' | jq
 To use a remote copy of the script:
 
 ```bash
-curl https://gist.githubusercontent.com/whitfieldsdad/0b0db7da70b13a892c58e9b5acf0a7ec/raw/885d648f29d1d8240df2f374c3ea7a7fa553c65a/cpe.py -s | python3 - 'cpe:2.3:a:microsoft:sql_server:-:*:*:*:*:*:*:*' | jq
+curl -s https://raw.githubusercontent.com/whitfieldsdad/cpe/main/cpe/cpe.py | python3 - 'cpe:2.3:a:microsoft:sql_server:-:*:*:*:*:*:*:*' | jq
 ```
 
 Example output:
