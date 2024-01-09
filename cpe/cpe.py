@@ -54,13 +54,13 @@ class Filter:
             return False
         if self.is_application is not None and self.is_application != cpe_id.is_application():
             return False
-        if self.is_hardware is not None and self.is_hardware != cpe_id.h
+        if self.is_hardware is not None and self.is_hardware != cpe_id.is_hardware():
             return False
         if self.is_operating_system is not None and self.is_operating_system != cpe_id.is_operating_system():
             return False
         return True
 
-    def matches_any(self, cpe_ids: Iterable[CPE]) -> bool:
+    def matches_any(self, cpe_ids: Iterable[Union[str, CPE]]) -> bool:
         return any(self.matches(cpe_id) for cpe_id in cpe_ids)
     
     def __call__(self, cpe_id: Union[str, CPE]) -> Any:
