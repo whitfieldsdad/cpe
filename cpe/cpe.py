@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 import dataclasses
 import argparse
+import fnmatch
 import json
 import re
 import sys
 from typing import Any, Iterable, List, Optional, Union
-import cpe.pattern_matching as pattern_matching
 
 _RE_SPLIT = re.compile(r'(?<!\\):')
 
@@ -48,9 +48,9 @@ class Filter:
         if isinstance(cpe_id, str):
             cpe_id = parse(cpe_id)
 
-        if self.vendors and not pattern_matching.matches_any(cpe_id.vendor, self.vendors):
+        if self.vendors and not str_matches_any(cpe_id.vendor, self.vendors):
             return False
-        if self.products and not pattern_matching.matches_any(cpe_id.product, self.products):
+        if self.products and not str_matches_any(cpe_id.product, self.products):
             return False
         if self.is_application is not None and self.is_application != cpe_id.is_application():
             return False
@@ -73,7 +73,7 @@ def filter_cpe_ids(cpe_ids: Iterable[CPE], search: Union[dict, Filter]) -> Itera
     yield from filter(search.matches, cpe_ids)
 
 
-def parse(cpe: str) -> CPE:
+def parse(value: str) -> CPE:
     """
     Decompose a CPE string into a Well Formed Name (WFN).
 
@@ -111,9 +111,9 @@ def parse(cpe: str) -> CPE:
     }
     """
     # ~99.9% of CPEs can be split on ':', and when parsing ~1.24M CPEs this is ~10% faster
-    parts = cpe.split(':') if cpe.count(':') == 12 else _RE_SPLIT.split(cpe)
+    parts = value.split(':') if value.count(':') == 12 else _RE_SPLIT.split(value)
     if len(parts) != 13:
-        raise ValueError(f'Invalid CPE: {cpe}')
+        raise ValueError(f'Invalid CPE: {value}')
 
     prefix, version = parts.pop(0), parts.pop(0)
     if prefix != 'cpe':
@@ -135,8 +135,28 @@ def parse(cpe: str) -> CPE:
         'other',
     ]
     d = dict(zip(keys, parts))
-    d['id'] = cpe
+    d['id'] = value
     return CPE(**d)
+
+
+def str_matches_any(value: str, patterns: Iterable[str], case_sensitive: bool = False) -> bool:
+    value = value if case_sensitive else value.lower()
+    for pattern in patterns:
+        pattern = pattern if case_sensitive else pattern.lower()
+        if str_matches(value, pattern, case_sensitive=True):
+            return True
+    return False
+
+
+def str_matches(value: str, pattern: str, case_sensitive: bool = False) -> bool:
+    if not case_sensitive:
+        value = value.lower()
+        pattern = pattern.lower()
+
+    if '*' in pattern:
+        return fnmatch.fnmatch(value, pattern)
+    else:
+        return value == pattern
 
 
 def _cli():
@@ -148,13 +168,13 @@ def _cli():
             parser.print_help()
             sys.exit(1)
         
-        cpes = sys.stdin.read().splitlines()
+        cpe_ids = sys.stdin.read().splitlines()
     else:
-        cpes = args.cpes
+        cpe_ids = args.cpes
 
-    for cpe in cpes:
+    for cpe_id in cpe_ids:
         try:
-            wfn = parse(cpe)
+            wfn = parse(cpe_id)
         except TypeError as e:
             print(e, file=sys.stderr)
             sys.exit(1)
