@@ -4,6 +4,8 @@ import argparse
 import json
 import re
 import sys
+from typing import Any, Iterable, List, Optional, Union
+import cpe.pattern_matching as pattern_matching
 
 _RE_SPLIT = re.compile(r'(?<!\\):')
 
@@ -31,6 +33,44 @@ class CPE:
     
     def is_operating_system(self) -> bool:
         return self.part == 'o'
+
+
+
+@dataclass()
+class Filter:
+    vendors: List[str] = dataclasses.field(default_factory=list)
+    products: List[str] = dataclasses.field(default_factory=list)
+    is_application: Optional[bool] = None
+    is_hardware: Optional[bool] = None
+    is_operating_system: Optional[bool] = None
+
+    def matches(self, cpe_id: Union[str, CPE]) -> bool:
+        if isinstance(cpe_id, str):
+            cpe_id = parse(cpe_id)
+
+        if self.vendors and not pattern_matching.matches_any(cpe_id.vendor, self.vendors):
+            return False
+        if self.products and not pattern_matching.matches_any(cpe_id.product, self.products):
+            return False
+        if self.is_application is not None and self.is_application != cpe_id.is_application():
+            return False
+        if self.is_hardware is not None and self.is_hardware != cpe_id.h
+            return False
+        if self.is_operating_system is not None and self.is_operating_system != cpe_id.is_operating_system():
+            return False
+        return True
+
+    def matches_any(self, cpe_ids: Iterable[CPE]) -> bool:
+        return any(self.matches(cpe_id) for cpe_id in cpe_ids)
+    
+    def __call__(self, cpe_id: Union[str, CPE]) -> Any:
+        return self.matches(cpe_id)
+
+
+def filter_cpe_ids(cpe_ids: Iterable[CPE], search: Union[dict, Filter]) -> Iterable[CPE]:
+    if isinstance(search, dict):
+        search = Filter(**search)
+    yield from filter(search.matches, cpe_ids)
 
 
 def parse(cpe: str) -> CPE:

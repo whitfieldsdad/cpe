@@ -157,3 +157,45 @@ print(json.dumps(dataclasses.asdict(result), indent=4))
     "other": "*"
 }
 ```
+
+### Filter CPE IDs by vendor
+
+The `Filter` class can be used to filter CPE IDs:
+
+```python
+from cpe import Filter
+
+cpe_id = 'cpe:2.3:a:microsoft:sql_server:-:*:*:*:*:*:*:*'
+f = Filter(vendors=['microsoft'])
+matches = f(cpe_id)
+print(matches)
+```
+
+```text
+True
+```
+
+For example, to select all CPE IDs corresponding to the Microsoft SQL Server product family:
+
+```python
+from cpe import Filter
+
+cpe_ids = [
+  'cpe:2.3:a:microsoft:sql_server_management_studio:18.6:*:*:*:*:*:*:*',
+  'cpe:2.3:a:microsoft:sql_server_reporting_services:2017:*:*:*:*:*:*:*',
+  'cpe:2.3:a:microsoft:sql_server_reporting_services:2019:*:*:*:*:*:*:*',
+  'cpe:2.3:a:oracle:mysql_server:5.7.26:*:*:*:*:*:*:*',
+  'cpe:2.3:a:oracle:mysql_server:8.0.15:*:*:*:*:*:*:*',
+  'cpe:2.3:o:microsoft:sql_server:2016:sp2:*:*:*:*:x64:*',
+]
+
+f = Filter(vendors=['microsoft'], products=['*sql_server*'], is_application=True)
+for cpe_id in filter(f, cpe_ids):
+  print(cpe_id)
+```
+
+```text
+cpe:2.3:a:microsoft:sql_server_management_studio:18.6:*:*:*:*:*:*:*
+cpe:2.3:a:microsoft:sql_server_reporting_services:2017:*:*:*:*:*:*:*
+cpe:2.3:a:microsoft:sql_server_reporting_services:2019:*:*:*:*:*:*:*
+```
