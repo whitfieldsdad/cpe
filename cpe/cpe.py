@@ -70,9 +70,10 @@ def parse(cpe: str) -> CPE:
         "other": "*"
     }
     """
-    parts = _RE_SPLIT.split(cpe)
+    # ~99.9% of CPEs can be split on ':', and when parsing ~1.24M CPEs this is ~10% faster
+    parts = cpe.split(':') if cpe.count(':') == 12 else _RE_SPLIT.split(cpe)
     if len(parts) != 13:
-        raise TypeError(f'Invalid CPE: {cpe}')
+        raise ValueError(f'Invalid CPE: {cpe}')
 
     prefix, version = parts.pop(0), parts.pop(0)
     if prefix != 'cpe':
