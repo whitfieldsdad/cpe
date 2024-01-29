@@ -6,6 +6,9 @@ import json
 import re
 import sys
 from typing import Any, Iterable, List, Optional, Union
+import logging
+
+logger = logging.getLogger(__name__)
 
 _RE_SPLIT = re.compile(r'(?<!\\):')
 
@@ -33,7 +36,6 @@ class CPE:
     
     def is_operating_system(self) -> bool:
         return self.part == 'o'
-
 
 
 @dataclass()
@@ -161,26 +163,46 @@ def str_matches(value: str, pattern: str, case_sensitive: bool = False) -> bool:
 
 def _cli():
     parser = argparse.ArgumentParser(description='CPE 2.3 parser')
-    parser.add_argument('cpes', nargs='*', help='CPEs to parse')
-    args = parser.parse_args()
-    if not args.cpes:
-        if _stdin_is_empty():
-            parser.print_help()
-            sys.exit(1)
-        
-        cpe_ids = sys.stdin.read().splitlines()
-    else:
-        cpe_ids = args.cpes
+    parser.add_argument('cpe-ids', nargs='*', help='CPEs to parse')
+    kwargs = vars(parser.parse_args()) 
+    
+    if kwargs['cpe-ids']:
+        cpe_ids = _split_strings_on_space_and_comma(kwargs['cpe-ids'])
+        if not cpe_ids:
+            logger.error("No CPE IDs parsed")
+            sys.exit(1)            
 
+    elif _stdin_is_empty:
+        logger.error("A set of space/comma delimited CPE IDs is required")
+        sys.exit(1)
+    else:
+        cpe_ids = _split_strings_on_space_and_comma(sys.stdin.readlines())
+        sys.exit(1)
+    
+    _print_cpe_ids_as_cpes(cpe_ids)
+
+
+def _split_strings_on_space_and_comma(values: Iterable[str]) -> Iterable[str]:
+    result = []
+    for v in values:
+        v = v.strip() 
+        if ',' in v:
+            for s in v.split(','):
+                s = s.strip()
+                result.append(s)
+        else:
+            result.append(v)
+    return result
+
+
+def _print_cpe_ids_as_cpes(cpe_ids: Iterable[str]):
     for cpe_id in cpe_ids:
         try:
-            wfn = parse(cpe_id)
-        except TypeError as e:
-            print(e, file=sys.stderr)
-            sys.exit(1)
-        
-        blob = json.dumps(dataclasses.asdict(wfn))
-        print(blob)
+            cpe = parse(cpe_id)
+        except ValueError as e:
+            logger.warning("Failed to parse CPE ID: `%s` - %s", cpe_id, e)
+        else:
+            print(json.dumps(dataclasses.asdict(cpe)))
 
 
 def _stdin_is_empty() -> bool:
@@ -191,4 +213,9 @@ def _stdin_is_empty() -> bool:
 
 
 if __name__ == '__main__':
+    logging.basicConfig(
+        format='%(asctime)s %(levelname)-8s %(message)s', 
+        level=logging.INFO, 
+        datefmt='%Y-%m-%d %H:%M:%S',
+    )
     _cli()

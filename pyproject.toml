@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cpe"
-version = "0.3.0"
+version = "1.0.0"
 description = "A simple CPE 2.3 parser"
 authors = ["Tyler Fisher <tylerfisher@tylerfisher.ca>"]
 license = "MIT"
