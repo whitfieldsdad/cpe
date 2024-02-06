@@ -2,8 +2,7 @@
 
 A simple CPE 2.3 parser written in Python 3.
 
-## Features
-
+⚠️ This project is under active development ⚠️
 
 ## Additional resources
 
